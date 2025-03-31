@@ -1,26 +1,22 @@
 const Medicine = require('../models/medicine');
-import { post } from 'axios';
+const axios = require('axios');
 
-export async function predictSideEffects(req, res) {
+exports.predictSideEffects = async (req, res) => {
     try {
         const { userId, name, ingredients, expiryDate } = req.body;
-
         const expiry = new Date(expiryDate);
         const today = new Date();
 
         let status, sideEffects = [];
 
         if (expiry < today) {
-            // Call ML Model API
-            const response = await post('http://127.0.0.1:5001/predict', { ingredients });
+            // Call the Flask API for expired medicines
+            const response = await axios.post(process.env.FLASK_API, { ingredients });
             sideEffects = response.data.sideEffects;
             status = "expired";
         } else {
             status = "not expired";
         }
-
-        const newMedicine = new Medicine({ userId, name, ingredients, expiryDate, status, sideEffects });
-        await newMedicine.save();
 
         res.json({ status, sideEffects });
 
@@ -28,4 +24,4 @@ export async function predictSideEffects(req, res) {
         console.error(err);
         res.status(500).json({ message: "Server error" });
     }
-}
+};
