@@ -17,7 +17,17 @@ exports.predictSideEffects = async (req, res) => {
         } else {
             status = "not expired";
         }
-
+        const med = new Medicine({
+            userId,
+            name,
+            ingredients,
+            expiryDate: expiry,
+            status,
+            sideEffects
+        });
+        await med.save();
+        console.log("Medicine saved successfully");
+        console.log("Medicine data:", med);
         res.json({ status, sideEffects });
 
     } catch (err) {
